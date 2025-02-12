@@ -1,27 +1,13 @@
-import React from 'react';
+import React from "react";
+import { useAuthStore } from "../../stores/authStore";
+import { UserCircle, User, Mail, Calendar, Phone, Globe, Bookmark, Folder, History, ExternalLink } from "lucide-react";
 
 const ProfilePage = () => {
-  const userDetails = {
-    name: 'John Doe',
-    username: 'johndoe123',
-    email: 'john.doe@example.com',
-    dob: '1995-05-20',
-    language: 'English',
-    phone: '123-456-7890',
-    country: 'USA',
-  };
+  const { authUser } = useAuthStore();
 
-  const savedPages = [
-    { title: 'React Basics', url: 'https://example.com/react-basics' },
-    { title: 'Tailwind CSS Guide', url: 'https://example.com/tailwind-css-guide' },
-    { title: 'JavaScript Best Practices', url: 'https://example.com/js-best-practices' },
-  ];
-
-  const browsingHistory = [
-    { title: 'Vue.js Tutorial', date: '2024-10-21', url: 'https://example.com/vue-tutorial' },
-    { title: 'CSS Grid vs Flexbox', date: '2024-10-20', url: 'https://example.com/css-grid-flexbox' },
-    { title: 'Understanding Async/Await', date: '2024-10-19', url: 'https://example.com/async-await' },
-  ];
+  if (!authUser) {
+    return <p className="text-center text-xl text-gray-700">Loading...</p>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-purple-300 p-6">
@@ -30,12 +16,14 @@ const ProfilePage = () => {
         <div className="mb-12 flex flex-col items-center">
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-2 rounded-full shadow-lg">
             <img
-              src="https://via.placeholder.com/150"
+              src={authUser.profilePic}
               alt="Profile"
               className="w-32 h-32 rounded-full object-cover border-4 border-white"
             />
           </div>
-          <h2 className="text-4xl font-bold text-gray-800 mt-6">{userDetails.name}</h2>
+          <h2 className="text-4xl font-bold text-gray-800 mt-6 flex items-center gap-2">
+            <UserCircle className="text-indigo-600" size={36} /> {authUser.name}
+          </h2>
         </div>
 
         {/* User Details Table */}
@@ -50,73 +38,104 @@ const ProfilePage = () => {
             </thead>
             <tbody>
               <tr className="border-b">
-                <td className="py-3 px-6 text-gray-600">Username</td>
-                <td className="py-3 px-6">{userDetails.username}</td>
+                <td className="py-3 px-6 text-gray-600 flex items-center gap-2">
+                  <User size={18} /> Username
+                </td>
+                <td className="py-3 px-6">{authUser.username}</td>
               </tr>
               <tr className="border-b bg-gray-50">
-                <td className="py-3 px-6 text-gray-600">Email</td>
-                <td className="py-3 px-6">{userDetails.email}</td>
+                <td className="py-3 px-6 text-gray-600 flex items-center gap-2">
+                  <Mail size={18} /> Email
+                </td>
+                <td className="py-3 px-6">{authUser.email}</td>
               </tr>
               <tr className="border-b">
-                <td className="py-3 px-6 text-gray-600">Date of Birth</td>
-                <td className="py-3 px-6">{userDetails.dob}</td>
-              </tr>
-              <tr className="border-b bg-gray-50">
-                <td className="py-3 px-6 text-gray-600">Language</td>
-                <td className="py-3 px-6">{userDetails.language}</td>
+                <td className="py-3 px-6 text-gray-600 flex items-center gap-2">
+                  <Calendar size={18} /> Date of Birth
+                </td>
+                <td className="py-3 px-6">{authUser.dob.split("T")[0]}</td>
               </tr>
               <tr className="border-b">
-                <td className="py-3 px-6 text-gray-600">Phone</td>
-                <td className="py-3 px-6">{userDetails.phone}</td>
+                <td className="py-3 px-6 text-gray-600 flex items-center gap-2">
+                  <Phone size={18} /> Phone
+                </td>
+                <td className="py-3 px-6">{authUser.mobile}</td>
               </tr>
               <tr className="bg-gray-50">
-                <td className="py-3 px-6 text-gray-600">Country</td>
-                <td className="py-3 px-6">{userDetails.country}</td>
+                <td className="py-3 px-6 text-gray-600 flex items-center gap-2">
+                  <Globe size={18} /> Country
+                </td>
+                <td className="py-3 px-6">{authUser.country?.toUpperCase()}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* Saved Pages Section */}
+        {/* Viewed Categories Section */}
         <div className="mb-12">
-          <h3 className="text-3xl font-bold text-gray-700 mb-4">Saved Pages</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedPages.map((page, index) => (
-              <a
-                key={index}
-                href={page.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gradient-to-r from-green-400 to-blue-500 p-6 rounded-lg shadow-lg text-white hover:scale-105 transform transition duration-300"
-              >
-                <h4 className="text-xl font-semibold mb-2">{page.title}</h4>
-                <p className="text-sm">Visit page</p>
-              </a>
+          <h3 className="text-3xl font-bold text-gray-700 mb-4">Viewed Categories</h3>
+          <div className="flex flex-wrap gap-4">
+            {authUser.viewedCategories.map((category, index) => (
+              <span key={index} className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md">
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </span>
             ))}
           </div>
         </div>
 
         {/* Browsing History Section */}
         <div className="mb-12">
-          <h3 className="text-3xl font-bold text-gray-700 mb-4">Browsing History</h3>
+          <h3 className="text-3xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+            <History size={28} className="text-red-500" /> Recent News Articles
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {browsingHistory.map((history, index) => (
-              <div
-                key={index}
-                className="bg-gradient-to-r from-pink-400 to-red-500 p-6 rounded-lg shadow-lg text-white hover:scale-105 transform transition duration-300"
-              >
-                <p className="text-lg font-semibold mb-1">{history.title}</p>
-                <p className="text-sm">{history.date}</p>
-                <a
-                  href={history.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm underline hover:text-white"
+            {authUser.history?.length === 0 ? (
+              <p className="text-gray-600 text-lg">No recent news articles.</p>
+            ) : (
+              authUser.history?.slice(0, 6).map((history, index) => (
+                <div
+                  key={index}
+                  className="bg-gradient-to-r from-purple-400 to-indigo-500 p-6 rounded-lg shadow-lg text-white flex items-center justify-between hover:scale-105 transform transition duration-300"
                 >
-                  View page
-                </a>
-              </div>
-            ))}
+                  <div>
+                    <p className="text-lg font-semibold">{history.headline}</p>
+                  </div>
+                  <a
+                    href={history.link}
+                    onClick={(e) => console.log(history)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm underline cursor-pointer flex items-center gap-1"
+                  >
+                    View page <ExternalLink size={16} />
+                  </a>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Saved Pages Section */}
+        <div className="mb-12">
+          <h3 className="text-3xl font-bold text-gray-700 mb-4">Saved Pages</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {authUser.savedPages?.length === 0 ? (
+              <p className="text-gray-600 text-lg">No saved pages.</p>
+            ) : (
+              authUser.savedPages.map((page, index) => (
+                <div key={index} className="bg-gray-100 p-4 rounded-lg shadow-md">
+                  <p className="text-lg font-semibold">{page.headline}</p>
+                  <a
+                    href={page.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 underline mt-2 block"
+                  >
+                    View Page
+                  </a>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

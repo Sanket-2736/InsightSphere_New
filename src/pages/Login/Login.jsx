@@ -1,14 +1,40 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
+import toast from "react-hot-toast";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
 
-  const handleLogin = (e) => {
+  const { isLoggingIn, login, authUser } = useAuthStore();
+  const navigate = useNavigate();
+
+  const formValidator = () => {
+    if (!formData.password) {
+      toast.error("Password is required!");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long!");
+      return false;
+    }
+    return true;
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Logging in with:', { email, password });
+    console.log("Logging in with:", formData);
+
+    if (!formValidator()) return;
+
+    await login(formData);
+
+    if (authUser) {
+      navigate("/"); // ✅ Correct usage of navigate
+    }
   };
 
   return (
@@ -17,19 +43,20 @@ const Login = () => {
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-              Email
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+              Username
             </label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="username"
+              value={formData.username}
+              onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="you@example.com"
+              placeholder="Enter your email"
               required
             />
           </div>
+
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
               Password
@@ -37,23 +64,28 @@ const Login = () => {
             <input
               type="password"
               id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="********"
+              placeholder="Enter your password"
               required
             />
           </div>
+
           <div className="flex items-center justify-between">
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             >
-              Login
+              {isLoggingIn ? "Logging In..." : "Login"}
             </button>
           </div>
+
           <p className="text-center text-gray-600 text-xs mt-4">
-            Don't have an account? <a href="/signup" className="text-blue-500 hover:text-blue-700">Sign up</a>
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-500 hover:text-blue-700">
+              Sign up
+            </Link>
           </p>
         </form>
       </div>
